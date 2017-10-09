@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+from datetime import datetime
 from urllib import parse
 
 import scrapy
@@ -93,7 +94,7 @@ class JobboleSpider(scrapy.Spider):
 
         # tags  (list)   ['职场', '面试']
         tags = response.css('p.entry-meta-hide-on-mobile a::text').extract()
-        tags = [t for t in tags if '评论' not in t]
+        tags = ', '.join([t for t in tags if '评论' not in t])
 
         # 传入item
         item['url'] = response.url
@@ -102,6 +103,10 @@ class JobboleSpider(scrapy.Spider):
         # 在pipelines中处理image path
         # item['front_image_path'] = front_image_path
         item['title'] = title
+        try:
+            create_date = datetime.strptime(create_date, '%Y/%m/%d').date()
+        except ValueError:
+            create_date = datetime.now().date()
         item['create_date'] = create_date
         item['praise_nums'] = praise_nums
         item['fav_nums'] = fav_nums

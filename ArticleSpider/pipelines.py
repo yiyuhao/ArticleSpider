@@ -4,6 +4,11 @@ import json
 
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy.exporters import JsonItemExporter
+from twisted.enterprise import adbapi
+
+import MySQLdb
+import MySQLdb.cursors
+
 
 # Define your item pipelines here
 #
@@ -18,6 +23,7 @@ class ArticlespiderPipeline(object):
 
 class ArticleImagePipeline(ImagesPipeline):
     """优先获取image path"""
+
     def item_completed(self, results, item, info):
         for __, value in results:
             item['front_image_path'] = value['path']
@@ -39,6 +45,7 @@ class JsonWithEncodingPipeline(object):
 
 class JsonExporterPipeline(object):
     """调用scrapy提供的json_exporter导出json文件"""
+
     def __init__(self):
         self.file = open('article_exporter.json', 'wb')
         self.exporter = JsonItemExporter(self.file, encoding='utf-8', ensure_ascii=False)
@@ -51,3 +58,44 @@ class JsonExporterPipeline(object):
     def process_item(self, item, spider):
         self.exporter.export_item(item)
         return item
+
+
+class MysqlTwistedPipeline(object):
+    def __init__(self, db_pool):
+        self.db_pool = db_pool
+
+    @classmethod
+    def from_settings(cls, settings):
+        params = dict(
+            host=settings['MYSQL_HOST'],
+            database=settings['MYSQL_DATABASE'],
+            user=settings['MYSQL_USER'],
+            password=settings['MYSQL_PASSWORD'],
+            charset='utf8',
+            cursorclass=MySQLdb.cursors.DictCursor,
+            use_unicode=True,
+        )
+
+        db_pool = adbapi.ConnectionPool('MySQLdb', **params)
+
+        return cls(db_pool)
+
+    def process_item(self, item, spider):
+        """async SQL insert with Twisted"""
+        query = self.db_pool.runInteraction(self.do_insert, item)
+        query.addErrback(self.handle_error, item, spider)
+
+    def do_insert(self, cursor, item):
+        """执行具体的插入"""
+        insert_sql = """
+            INSERT INTO jobbole_article(title, create_date, url, url_object_id, front_image_url, front_image_path,
+                                        comment_nums, fav_nums, praise_nums, tags, content)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(insert_sql, (item['title'], item['create_date'], item['url'], item['url_object_id'],
+                                    item['front_image_url'], item['front_image_path'], item['comment_nums'],
+                                    item['fav_nums'], item['praise_nums'], item['tags'], item['content']))
+
+    def handle_error(self, failure, item, spider):
+        """处理异步插入的异常"""
+        print(failure)

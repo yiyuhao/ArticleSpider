@@ -69,8 +69,9 @@ ROBOTSTXT_OBEY = False
 ITEM_PIPELINES = {
    'ArticleSpider.pipelines.ArticleImagePipeline': 1,
    # 'scrapy.pipelines.images.ImagesPipeline': 1,
-   'ArticleSpider.pipelines.JsonExporterPipeline': 2,
-   'ArticleSpider.pipelines.ArticlespiderPipeline': 300,
+   # 'ArticleSpider.pipelines.JsonExporterPipeline': 2,
+   'ArticleSpider.pipelines.MysqlTwistedPipeline': 2,
+   # 'ArticleSpider.pipelines.ArticlespiderPipeline': 300,
 }
 
 IMAGES_URLS_FIELD = 'front_image_url'
@@ -101,3 +102,8 @@ IMAGES_MIN_HEIGHT = 100
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+MYSQL_HOST = 'localhost'
+MYSQL_DATABASE = 'article_spider'
+MYSQL_USER = 'root'
+MYSQL_PASSWORD = 'root'
