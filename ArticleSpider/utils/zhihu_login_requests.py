@@ -15,10 +15,7 @@ from ArticleSpider.utils.zheye import zheye
 # 初始化session及cookies
 session = requests.session()
 session.cookies = cookielib.LWPCookieJar(filename='cookies.txt')
-try:
-    session.cookies.load(ignore_discard=True)
-except:
-    print('cookie未能加载')
+
 
 # user agent及headers
 user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.104 Safari/537.36'
@@ -84,13 +81,20 @@ def zhihu_login(account, password):
             'captcha_type': 'cn'
         }
 
-        response = session.post(url, data=data, headers=headers)
+        session.post(url, data=data, headers=headers)
 
         session.cookies.save()
 
 
 def index():
     """登录成功后通过cookie请求知乎首页"""
+
+    # load cookies
+    try:
+        session.cookies.load(ignore_discard=True)
+    except:
+        print('cookie未能加载')
+
     response = session.get('https://www.zhihu.com', headers=headers)
     with open('index_page.html', 'wb') as f:
         f.write(response.text.encode())
@@ -98,5 +102,5 @@ def index():
 
 
 if __name__ == '__main__':
-    # zhihu_login('13880992332', 'Popkart88')
+    # zhihu_login('13333333333', 'Password')
     index()
