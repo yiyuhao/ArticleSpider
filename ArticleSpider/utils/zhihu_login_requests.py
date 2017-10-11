@@ -23,12 +23,11 @@ except:
     print('cookie未能加载')
 
 
-# user agent及headers
-user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.104 Safari/537.36'
+# headers
 headers = {
     'HOST': 'www.zhihu.com',
     'Referer': 'https://www.zhihu.com',
-    'User-Agent': user_agent
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.104 Safari/537.36'
 }
 
 
@@ -43,7 +42,7 @@ def get_captcha_position():
     """获取图片验证码并返回倒立汉字的坐标"""
 
     random_num = str(int(time.time() * 1000))
-    captcha_url = 'https://www.zhihu.com/captcha.gif?r{random_num}&type=login&lang=cn'.format(random_num=random_num)
+    captcha_url = 'https://www.zhihu.com/captcha.gif?r={random_num}&type=login&lang=cn'.format(random_num=random_num)
     response = session.get(captcha_url, headers=headers, stream=True)
     # 成功返回
     if response.status_code == 200:
@@ -86,10 +85,6 @@ def zhihu_login(account, password):
             'captcha': '{"img_size":[200, 44], "input_points":%s}' % get_captcha_position(),
             'captcha_type': 'cn'
         }
-
-        session.post(url, data=data, headers=headers)
-
-        session.cookies.save()
     elif '@' in account:
         print('邮箱登陆')
         url = 'https://www.zhihu.com/login/email'
