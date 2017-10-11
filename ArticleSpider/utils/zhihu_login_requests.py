@@ -16,6 +16,12 @@ from ArticleSpider.utils.zheye import zheye
 session = requests.session()
 session.cookies = cookielib.LWPCookieJar(filename='cookies.txt')
 
+# load cookies
+try:
+    session.cookies.load(ignore_discard=True)
+except:
+    print('cookie未能加载')
+
 
 # user agent及headers
 user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.104 Safari/537.36'
@@ -61,7 +67,7 @@ def get_captcha_position():
         # y, x --> x, y
         p[i][0], p[i][1] = p[i][1], p[i][0]
     # 交换坐标顺序(将第一个倒立汉字坐标放在第一位), 比较p[0]与p[-1]可以避免只有一个倒立汉字的情况
-    if p[0][1] > p[-1][1]:
+    if p[0][0] > p[-1][0]:
         p.reverse()
 
     return str(p)
@@ -84,16 +90,36 @@ def zhihu_login(account, password):
         session.post(url, data=data, headers=headers)
 
         session.cookies.save()
+    elif '@' in account:
+        print('邮箱登陆')
+        url = 'https://www.zhihu.com/login/email'
+        data = {
+            '_xsrf': get_xsrf(),
+            'email': account,
+            'password': password,
+            'captcha': '{"img_size":[200, 44], "input_points":%s}' % get_captcha_position(),
+            'captcha_type': 'cn'
+        }
+    else:
+        raise ValueError('Invalid account')
+
+    r = session.post(url, data=data, headers=headers)
+
+    session.cookies.save()
+
+
+def is_login():
+    """通过访问个人中心获取返回状态码来判断是否登陆"""
+
+    res = session.get('https://www.zhihu.com/inbox', headers=headers, allow_redirects=False)
+    return True if res.status_code == 200 else False
 
 
 def index():
     """登录成功后通过cookie请求知乎首页"""
 
-    # load cookies
-    try:
-        session.cookies.load(ignore_discard=True)
-    except:
-        print('cookie未能加载')
+    if not is_login():
+        zhihu_login('390999999@qq.com', 'Password')
 
     response = session.get('https://www.zhihu.com', headers=headers)
     with open('index_page.html', 'wb') as f:
@@ -102,5 +128,4 @@ def index():
 
 
 if __name__ == '__main__':
-    # zhihu_login('13333333333', 'Password')
     index()
