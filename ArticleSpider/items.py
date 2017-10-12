@@ -52,24 +52,50 @@ class JobboleArticleItem(scrapy.Item):
                         output_processor=Join(', '))
     content = scrapy.Field()
 
+    @property
+    def sql(self):
+        insert_sql = """
+            INSERT INTO jobbole_article(title, create_date, url, url_object_id, front_image_url, front_image_path,
+                                        comment_nums, fav_nums, praise_nums, tags, content)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+
+        params = (self['title'], self['create_date'], self['url'], self['url_object_id'],
+                  self['front_image_url'], self['front_image_path'], self['comment_nums'],
+                  self['fav_nums'], self['praise_nums'], self['tags'], self['content'])
+
+        return insert_sql, params
+
 
 class ZhihuQuestionItem(scrapy.Item):
     """知乎的问题 item"""
 
     zhihu_id = scrapy.Field()
-    topics = scrapy.Field()
+    topics = scrapy.Field(output_processor=Join(', '))
     url = scrapy.Field()
     title = scrapy.Field()
     content = scrapy.Field()
     # 通过页面无法获取
     # create_time = scrapy.Field()
     # update_time = scrapy.Field()
-    answer_num = scrapy.Field()
-    comments_num = scrapy.Field()
-    watch_user_num = scrapy.Field()
-    click_num = scrapy.Field()
+    answer_num = scrapy.Field(input_processor=MapCompose(numbers_convert))
+    comments_num = scrapy.Field(input_processor=MapCompose(numbers_convert))
+    watch_user_num = scrapy.Field(output_processor=lambda x: int(x[0]))
+    click_num = scrapy.Field(output_processor=lambda x: int(x[1]))
     crawl_time = scrapy.Field()
-    crawl_update_time = scrapy.Field()
+    # crawl_update_time = scrapy.Field()
+
+    @property
+    def sql(self):
+        insert_sql = """
+                INSERT INTO zhihu_question(zhihu_id, topics, url, title, content, answer_num, comments_num,
+                                           watch_user_num, click_num, crawl_time)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+
+        params = (self['zhihu_id'], self['topics'], self['url'], self['title'],
+                  self['content'], self['answer_num'], self['comments_num'],
+                  self['watch_user_num'], self['click_num'], self['crawl_time'])
+
+        return insert_sql, params
 
 
 class ZhihuAnswerItem(scrapy.Item):
@@ -85,4 +111,17 @@ class ZhihuAnswerItem(scrapy.Item):
     create_time = scrapy.Field()
     update_time = scrapy.Field()
     crawl_time = scrapy.Field()
-    crawl_update_time = scrapy.Field()
+    # crawl_update_time = scrapy.Field()
+
+    @property
+    def sql(self):
+        insert_sql = """
+                    INSERT INTO zhihu_answer(zhihu_id, url, question_id, author_id, content, praise_num, 
+                                             comments_num, create_time, update_time, crawl_time)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+
+        params = (self['zhihu_id'], self['url'], self['question_id'], self['author_id'],
+                  self['content'], self['praise_num'], self['comments_num'],
+                  self['create_time'], self['update_time'], self['crawl_time'])
+
+        return insert_sql, params

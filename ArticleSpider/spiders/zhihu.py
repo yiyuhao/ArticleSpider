@@ -76,22 +76,22 @@ class ZhihuSpider(scrapy.Spider):
             il.add_css('topics', 'div.QuestionHeader-topics .Popover div::text')
             il.add_value('url', response.url)
             il.add_css('title', 'h1.QuestionHeader-title::text')
-            il.add_css('content', 'div.QuestionHeader-detail div div span::text')
+            il.add_css('content', 'div.QuestionHeader-detail div div span')
             # il.add_css('create_time', '')
             # il.add_css('update_time', '')
             il.add_css('answer_num', '.List-headerText span::text')
-            il.add_css('comments_num', '.QuestionAnswers-answers div div div h4 span::text')
+            il.add_css('comments_num', '.QuestionHeader-Comment button::text')
             il.add_css('watch_user_num', '.NumberBoard-value::text')
             il.add_css('click_num', '.NumberBoard-value::text')
-            # il.add_css('crawl_time', '')
+            il.add_value('crawl_time', datetime.now().date())
             # il.add_css('crawl_update_time', '')
 
-            question_item = il.load_item()
+            item = il.load_item()
 
             yield scrapy.Request(self.start_answer_url.format(question_id=question_id, limit=20, offset=0),
                                  headers=self.headers,
                                  callback=self.parse_answer)
-            yield question_item
+            yield item
         else:
             # 处理旧版本
             print('有旧版本页面')

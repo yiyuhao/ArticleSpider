@@ -22,7 +22,7 @@ class ArticleImagePipeline(ImagesPipeline):
         if 'front_image_url' in item:
             for __, value in results:
                 item['front_image_path'] = value['path']
-            return item
+        return item
 
 
 class JsonWithEncodingPipeline(object):
@@ -81,15 +81,12 @@ class MysqlTwistedPipeline(object):
         query.addErrback(self.handle_error, item, spider)
 
     def do_insert(self, cursor, item):
-        """执行具体的插入"""
-        insert_sql = """
-            INSERT INTO jobbole_article(title, create_date, url, url_object_id, front_image_url, front_image_path,
-                                        comment_nums, fav_nums, praise_nums, tags, content)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(insert_sql, (item['title'], item['create_date'], item['url'], item['url_object_id'],
-                                    item['front_image_url'], item['front_image_path'], item['comment_nums'],
-                                    item['fav_nums'], item['praise_nums'], item['tags'], item['content']))
+            根据不同item构建不同sql，执行具体的插入
+        """
+
+        insert_sql, sql_params = item.sql
+        cursor.execute(insert_sql, sql_params)
 
     def handle_error(self, failure, item, spider):
         """处理异步插入的异常"""
