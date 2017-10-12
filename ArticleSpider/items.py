@@ -118,7 +118,10 @@ class ZhihuAnswerItem(scrapy.Item):
         insert_sql = """
                     INSERT INTO zhihu_answer(zhihu_id, url, question_id, author_id, content, praise_num, 
                                              comments_num, create_time, update_time, crawl_time)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE content=VALUES(content), comments_num=VALUES(comments_num), 
+                                            praise_num=VALUES(praise_num), content=VALUES(update_time)
+                    """
 
         params = (self['zhihu_id'], self['url'], self['question_id'], self['author_id'],
                   self['content'], self['praise_num'], self['comments_num'],
