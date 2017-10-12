@@ -94,7 +94,7 @@ class ZhihuSpider(scrapy.Spider):
             yield item
         else:
             # 处理旧版本
-            print('有旧版本页面')
+            print('有旧版本页面: %s' % response.url)
 
     def parse_answer(self, response):
         """extract item from answer"""
@@ -113,8 +113,9 @@ class ZhihuSpider(scrapy.Spider):
             answer_item['content'] = answer['content'] if 'content' in answer else None
             answer_item['praise_num'] = answer['voteup_count']
             answer_item['comments_num'] = answer['comment_count']
-            answer_item['create_time'] = answer['created_time']
-            answer_item['update_time'] = answer['updated_time']
+            # 将str格式timestamp转换为datetime
+            answer_item['create_time'] = datetime.fromtimestamp(float(answer['created_time']))
+            answer_item['update_time'] = datetime.fromtimestamp(float(answer['updated_time']))
             answer_item['crawl_time'] = datetime.now()
 
             yield answer_item
