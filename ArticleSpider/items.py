@@ -171,7 +171,7 @@ class LagouJobItem(scrapy.Item):
     job_advantage = scrapy.Field()
     job_desc = scrapy.Field()
     job_addr = scrapy.Field(
-        input_processor=MapCompose(remove_tags, handle_jobaddr),
+        input_processor=MapCompose(handle_jobaddr),
     )
     company_name = scrapy.Field()
     company_url = scrapy.Field()
@@ -192,7 +192,7 @@ class LagouJobItem(scrapy.Item):
             self["work_years"], self["degree_need"], self["job_type"],
             self["publish_time"], self["job_advantage"], self["job_desc"],
             self["job_addr"], self["company_name"], self["company_url"],
-            self["job_addr"], self["crawl_time"].strftime(SQL_DATETIME_FORMAT),
+            self["job_addr"], self["crawl_time"],
         )
 
         return insert_sql, params

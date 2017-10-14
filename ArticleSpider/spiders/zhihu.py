@@ -32,7 +32,6 @@ class ZhihuSpider(scrapy.Spider):
     headers = {
         'HOST': 'www.zhihu.com',
         'Referer': 'https://www.zhihu.com',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.104 Safari/537.36'
     }
 
     def parse(self, response):
