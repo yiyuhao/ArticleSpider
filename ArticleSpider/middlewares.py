@@ -8,6 +8,8 @@
 from scrapy import signals
 from fake_useragent import UserAgent
 
+from tools.xici_ip_poll import XiciProxyIpPool
+
 
 class ArticlespiderSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -70,3 +72,12 @@ class RandomUserAgentMiddleware(object):
 
     def process_request(self, request, spider):
         request.headers.setdefault('User-Agent', getattr(self.user_agent, self.user_agent_type))
+
+
+class RandomProxyMiddleware(object):
+    """动态设置ip代理"""
+
+    def process_request(self, request, spider):
+        ip_pool = XiciProxyIpPool()
+        ip = ip_pool.get_random_ip()
+        request.meta['proxy'] = ip

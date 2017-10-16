@@ -14,10 +14,8 @@ class JobboleSpider(scrapy.Spider):
 
     def parse(self, response):
         """
-        1、获取文章列表页中的文章url并进行解析
-        2、获取下一页的url并交给downloader进行下载
-        :param response:
-        :return:
+            1、获取文章列表页中的文章url并进行解析
+            2、获取下一页的url并交给downloader进行下载
         """
         # 获取列表页中所有文章url
         post_nodes = response.css('#archive .floated-thumb .post-thumb a')
