@@ -45,7 +45,7 @@ class XiciProxyIpPool:
                 speed = tr.css('.bar::attr(title)').extract_first()
                 if speed:
                     speed = float(speed.split('秒')[0])
-                # 插入db的一行数据
+                # 用于插入db的一行数据
                 line = (ip, port, proxy_type, speed)
 
                 # 判断解析正确
@@ -62,6 +62,8 @@ class XiciProxyIpPool:
                     self.insert_db(line)
                 except:
                     print('error to insert a line: ', line)
+                else:
+                    print('Success in inserting a line: ', line)
 
     def insert_db(self, line):
         """爬取的数据插入数据库"""
@@ -103,7 +105,7 @@ class XiciProxyIpPool:
         try:
             res = requests.get('http://www.baidu.com', proxies={'http': ip})
         except:
-            print('invalid ip and port')
+            print('invalid ip and port: %s' % ip)
             return False
         else:
             code = res.status_code
@@ -120,5 +122,4 @@ class XiciProxyIpPool:
 
 if __name__ == '__main__':
     ip_pool = XiciProxyIpPool()
-    # ip = ip_pool.get_random_ip()
-    ip_pool.crawl_ips()
+    ip = ip_pool.get_random_ip()

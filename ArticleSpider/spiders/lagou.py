@@ -5,15 +5,28 @@ import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
-
+from tools.xici_ip_poll import XiciProxyIpPool
 from ArticleSpider.utils.common import md5
 from ArticleSpider.items import LagouJobItem, LagouJobItemLoader
 
 
 class LagouSpider(CrawlSpider):
+
+    def __init__(self):
+        super(LagouSpider, self).__init__()
+        # 代理ip池，在download middleware中随机获取ip
+        self.ip_pool = XiciProxyIpPool()
+
     name = 'lagou'
     allowed_domains = ['www.lagou.com']
     start_urls = ['https://www.lagou.com/']
+
+    # 覆盖默认配置
+    custom_settings = {'DOWNLOADER_MIDDLEWARES': {
+        'ArticleSpider.middlewares.RandomUserAgentMiddleware': 543,
+        'ArticleSpider.middlewares.RandomProxyMiddleware': 544,
+        'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+    }}
 
     rules = (
         Rule(LinkExtractor(allow=r'zhaopin/.*'), follow=True),
