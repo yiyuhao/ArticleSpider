@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-import scrapy
+from scrapy.http import Request
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from tools.xici_ip_poll import XiciProxyIpPool
+from ArticleSpider.utils.selenium_login_lagou import get_cookies
 from ArticleSpider.utils.common import md5
 from ArticleSpider.items import LagouJobItem, LagouJobItemLoader
 
@@ -24,7 +25,7 @@ class LagouSpider(CrawlSpider):
     # 覆盖默认配置
     custom_settings = {'DOWNLOADER_MIDDLEWARES': {
         'ArticleSpider.middlewares.RandomUserAgentMiddleware': 543,
-        'ArticleSpider.middlewares.RandomProxyMiddleware': 544,
+        # 'ArticleSpider.middlewares.RandomProxyMiddleware': 544,
         'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
     }}
 
@@ -39,6 +40,12 @@ class LagouSpider(CrawlSpider):
     #
     # def process_results(self, response, results):
     #     return results
+
+    def start_requests(self):
+        """重写， 传入selenium获取到的cookie"""
+        cookies = get_cookies()
+        for url in self.start_urls:
+            yield Request(url, dont_filter=True, cookies=cookies)
 
     def parse_job(self, response):
         """解析拉勾网的职位"""

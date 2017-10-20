@@ -7,10 +7,13 @@
 
 import re
 from datetime import datetime
+from w3lib.html import remove_tags
 
 import scrapy
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import MapCompose, TakeFirst, Join
+from ArticleSpider.models.es_types import JobboleEsModel, ZhihuQuestionEsModel, \
+    ZhihuAnswerEsModel, LagouEsModel
 
 
 def create_date_convert(value):
@@ -65,6 +68,18 @@ class JobboleArticleItem(scrapy.Item):
 
         return insert_sql, params
 
+    def item_to_elasticsearch(self):
+        article = JobboleEsModel()
+        # item各字段 赋值给article
+        for field in self:
+            if hasattr(article, field):
+                setattr(article, field, self[field])
+        # content需要清除html tags
+        article.content = remove_tags(self['content'])
+        # elasticsearch id
+        article.meta.id = self['url_object_id']
+        article.save()
+
 
 class ZhihuQuestionItem(scrapy.Item):
     """知乎的问题 item"""
@@ -98,6 +113,18 @@ class ZhihuQuestionItem(scrapy.Item):
 
         return insert_sql, params
 
+    def item_to_elasticsearch(self):
+        article = ZhihuQuestionEsModel()
+        # item各字段 赋值给article
+        for field in self:
+            if hasattr(article, field):
+                setattr(article, field, self[field])
+        # content需要清除html tags
+        article.content = remove_tags(self['content'])
+        # elasticsearch id
+        article.meta.id = self['zhihu_id']
+        article.save()
+
 
 class ZhihuAnswerItem(scrapy.Item):
     """知乎的答案 item"""
@@ -130,6 +157,18 @@ class ZhihuAnswerItem(scrapy.Item):
                   self['create_time'], self['update_time'], self['crawl_time'])
 
         return insert_sql, params
+
+    def item_to_elasticsearch(self):
+        article = ZhihuAnswerEsModel()
+        # item各字段 赋值给article
+        for field in self:
+            if hasattr(article, field):
+                setattr(article, field, self[field])
+        # content需要清除html tags
+        article.content = remove_tags(self['content'])
+        # elasticsearch id
+        article.meta.id = self['zhihu_id']
+        article.save()
 
 
 def remove_splash(value):
@@ -196,3 +235,16 @@ class LagouJobItem(scrapy.Item):
         )
 
         return insert_sql, params
+
+    def item_to_elasticsearch(self):
+        article = LagouEsModel()
+        # item各字段 赋值给article
+        for field in self:
+            if hasattr(article, field):
+                setattr(article, field, self[field])
+        # content需要清除html tags
+        article.job_desc = remove_tags(self['job_desc'])
+        article.job_addr = remove_tags(self['job_addr'])
+        # elasticsearch id
+        article.meta.id = self['url_object_id']
+        article.save()

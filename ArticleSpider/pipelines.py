@@ -79,6 +79,7 @@ class MysqlTwistedPipeline(object):
         """async SQL insert with Twisted"""
         query = self.db_pool.runInteraction(self.do_insert, item)
         query.addErrback(self.handle_error, item, spider)
+        return item
 
     def do_insert(self, cursor, item):
         """
@@ -91,3 +92,12 @@ class MysqlTwistedPipeline(object):
     def handle_error(self, failure, item, spider):
         """处理异步插入的异常"""
         print(failure)
+
+
+class ElasticsearchPipeline(object):
+    """将数据写入到elasticsearch中"""
+
+    def process_item(self, item, spider):
+        """将item转换为es数据"""
+        item.item_to_elasticsearch()
+        return item
