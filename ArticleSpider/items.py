@@ -14,6 +14,10 @@ from scrapy.loader import ItemLoader
 from scrapy.loader.processors import MapCompose, TakeFirst, Join
 from ArticleSpider.models.es_types import JobboleEsModel, ZhihuQuestionEsModel, \
     ZhihuAnswerEsModel, LagouEsModel
+from elasticsearch_dsl.connections import connections
+
+# 连接本地elasticsearch
+es = connections.create_connection(JobboleEsModel._doc_type.using)
 
 
 def create_date_convert(value):
@@ -22,6 +26,25 @@ def create_date_convert(value):
     except ValueError:
         create_date = datetime.now().date()
     return create_date
+
+
+def gen_suggest(index, info_tuple):
+    """根据字符串生成搜索建议数组"""
+    used_words = set()
+    suggests = []
+    for text, weight in info_tuple:
+        if text:
+            # 调用es的analyzer接口分析字符串
+            words = es.indices.analyze(index=index, analyzer='ik_max_word', params={'filter': ['lowercase']}, body=text)
+            analyzed_words = set([r['token'] for r in words['tokens'] if len(r['token']) > 1])
+            new_words = analyzed_words - used_words
+            used_words.update(new_words)
+        else:
+            new_words = set()
+
+        if new_words:
+            suggests.append({'input': list(new_words), 'weight': weight})
+    return suggests
 
 
 def numbers_convert(value):
@@ -78,6 +101,9 @@ class JobboleArticleItem(scrapy.Item):
         article.content = remove_tags(self['content'])
         # elasticsearch id
         article.meta.id = self['url_object_id']
+        # 搜索建议
+        article.suggest = gen_suggest(JobboleEsModel._doc_type.index,
+                                      ((article.title, 10), (article.tags, 7)))
         article.save()
 
 
