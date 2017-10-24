@@ -31,8 +31,8 @@ class JobboleEsModel(DocType):
     praise_nums = Integer()
     fav_nums = Integer()
     comment_nums = Integer()
-    tags = Text(analyzer=ik_analyzer)
-    content = Text(analyzer=ik_analyzer)
+    tags = Text(analyzer='ik_max_word')
+    content = Text(analyzer='ik_max_word')
 
     class Meta:
         index = 'jobbole'
@@ -40,11 +40,12 @@ class JobboleEsModel(DocType):
 
 
 class ZhihuQuestionEsModel(DocType):
+    suggest = Completion(analyzer=ik_analyzer)
     zhihu_id = Keyword()
-    topics = Text()
+    topics = Text(analyzer='ik_max_word')
     url = Keyword()
-    title = Text()
-    content = Text()
+    title = Text(analyzer='ik_max_word')
+    content = Text(analyzer='ik_max_word')
     create_time = Date()
     update_time = Date()
     answer_num = Integer()
@@ -60,11 +61,12 @@ class ZhihuQuestionEsModel(DocType):
 
 
 class ZhihuAnswerEsModel(DocType):
+    suggest = Completion(analyzer=ik_analyzer)
     zhihu_id = Keyword()
     url = Keyword()
     question_id = Keyword()
     author_id = Keyword()
-    content = Text()
+    content = Text(analyzer='ik_max_word')
     praise_num = Integer()
     comments_num = Integer()
     create_time = Date()
@@ -77,21 +79,22 @@ class ZhihuAnswerEsModel(DocType):
         
 
 class LagouEsModel(DocType):
-    title = Text()
+    suggest = Completion(analyzer=ik_analyzer)
+    title = Text(analyzer='ik_max_word')
     url = Keyword()
     url_object_id = Keyword()
     salary = Keyword()
-    job_city = Text()
+    job_city = Text(analyzer='ik_max_word')
     work_years = Keyword()
-    degree_need = Text()
-    job_type = Text()
+    degree_need = Text(analyzer='ik_max_word')
+    job_type = Text(analyzer='ik_max_word')
     publish_time = Keyword()
     job_advantage = Keyword()
-    job_desc = Text()
+    job_desc = Text(analyzer='ik_max_word')
     job_addr = Keyword()
-    company_name = Text()
+    company_name = Keyword()
     company_url = Keyword()
-    tags = Text()
+    tags = Text(analyzer='ik_max_word')
     crawl_time = Date()
 
     class Meta:

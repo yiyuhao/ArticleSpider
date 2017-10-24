@@ -35,12 +35,6 @@ class LagouSpider(CrawlSpider):
         Rule(LinkExtractor(allow=r'jobs/\d+.html'), callback='parse_job', follow=True),
     )
 
-    # def parse_start_url(self, response):
-    #     return []
-    #
-    # def process_results(self, response, results):
-    #     return results
-
     def start_requests(self):
         """重写， 传入selenium获取到的cookie"""
         cookies = get_cookies()
