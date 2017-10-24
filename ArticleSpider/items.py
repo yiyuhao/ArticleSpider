@@ -9,6 +9,7 @@ import re
 from datetime import datetime
 from w3lib.html import remove_tags
 
+import redis
 import scrapy
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import MapCompose, TakeFirst, Join
@@ -18,6 +19,9 @@ from elasticsearch_dsl.connections import connections
 
 # 连接本地elasticsearch
 es = connections.create_connection(JobboleEsModel._doc_type.using)
+
+# 连接本地redis
+redis_cli = redis.StrictRedis()
 
 
 def create_date_convert(value):
@@ -118,6 +122,9 @@ class JobboleArticleItem(scrapy.Item):
                                       ((article.title, 10), (article.tags, 7)))
         article.save()
 
+        # 统计爬取量
+        redis_cli.incr("jobbole_count")
+
 
 class ZhihuQuestionItem(scrapy.Item):
     """知乎的问题 item"""
@@ -164,6 +171,9 @@ class ZhihuQuestionItem(scrapy.Item):
         article.suggest = gen_suggest(ZhihuQuestionEsModel._doc_type.index,
                                       ((article.title, 10), (article.topics, 7), (article.content, 5)))
         article.save()
+
+        # 统计爬取量
+        redis_cli.incr("zhihu_question_count")
 
 
 class ZhihuAnswerItem(scrapy.Item):
@@ -273,3 +283,6 @@ class LagouJobItem(scrapy.Item):
                                       ((article.title, 10), (article.job_city, 5), (article.degree_need, 5),
                                        (article.job_type, 7), (article.job_desc, 5)))
         article.save()
+
+        # 统计爬取量
+        redis_cli.incr("lagou_count")
