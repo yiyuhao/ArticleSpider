@@ -78,3 +78,4 @@ class RandomProxyMiddleware(object):
     def process_request(self, request, spider):
         ip = spider.ip_pool.get_random_ip()
         request.meta['proxy'] = ip
+        pass

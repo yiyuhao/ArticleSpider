@@ -8,6 +8,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from tools.xici_ip_poll import XiciProxyIpPool
 from ArticleSpider.utils.selenium_login_lagou import get_cookies
 from ArticleSpider.utils.common import md5
+from ArticleSpider.utils.random_proxy_ip import ProxyIpPool
 from ArticleSpider.items import LagouJobItem, LagouJobItemLoader
 
 
@@ -15,8 +16,10 @@ class LagouSpider(CrawlSpider):
 
     def __init__(self):
         super(LagouSpider, self).__init__()
-        # 代理ip池，在download middleware中随机获取ip
-        self.ip_pool = XiciProxyIpPool()
+        # 免费代理ip池，在download middleware中随机获取ip
+        # self.ip_pool = XiciProxyIpPool()
+        # 收费代理ip池
+        self.ip_pool = ProxyIpPool()
 
     name = 'lagou'
     allowed_domains = ['www.lagou.com']
@@ -25,7 +28,7 @@ class LagouSpider(CrawlSpider):
     # 覆盖默认配置
     custom_settings = {'DOWNLOADER_MIDDLEWARES': {
         'ArticleSpider.middlewares.RandomUserAgentMiddleware': 543,
-        # 'ArticleSpider.middlewares.RandomProxyMiddleware': 544,
+        'ArticleSpider.middlewares.RandomProxyMiddleware': 542,
         'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
     }}
 
