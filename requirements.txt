@@ -31,7 +31,7 @@ pyasn1-modules==0.1.4
 pycparser==2.18
 PyDispatcher==2.0.5
 pyOpenSSL==17.3.0
-pywin32==221
+pywin32==301
 PyYAML==3.12
 query-string==0.0.0
 queuelib==1.4.2
